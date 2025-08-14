@@ -20,13 +20,13 @@ class AuthenticationService:
         user = self._users_repo.get_user_by_email(login_data.email)
         if not user:
             return LoginResultDTO(status=LoginStatus.unauthorized)
-        if not user.is_active:
-            return LoginResultDTO(status=LoginStatus.email_unverified)
         hasher = PasswordHasher()
         try:
             hasher.verify(user.password_hash, login_data.password)
         except argon2_exceptions.VerifyMismatchError:
             return LoginResultDTO(status=LoginStatus.unauthorized)
+        if not user.is_active:
+            return LoginResultDTO(status=LoginStatus.email_unverified)
         auth_user = AuthenticatedUserDTO(email=user.email, role=user.role)
         return LoginResultDTO(status=LoginStatus.successful, user=auth_user)
 
@@ -38,6 +38,6 @@ class AuthenticationService:
         password_hash = hasher.hash(password)
         # Create user with default role 'user'
         user = self._users_repo.create_user(
-            email=email, password=password_hash, role="user"
+            email=email, hash=password_hash, role="user"
         )
         return AuthenticatedUserDTO(email=user.email, role=user.role)

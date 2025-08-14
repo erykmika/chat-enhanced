@@ -17,13 +17,16 @@ class UsersDatabaseRepository(UsersRepoInterface):
         ).scalar_one_or_none()
         if user:
             return RegisteredUserDTO(
-                email=user.email, role=user.role, password_hash=user.password, is_active=user.is_active
+                email=user.email,
+                role=user.role,
+                password_hash=user.hash,
+                is_active=user.is_active,
             )
         else:
             return None
 
-    def create_user(self, email: str, password: str, role: str) -> RegisteredUserDTO:
-        new_user = User(email=email, password=password, role=role)
+    def create_user(self, email: str, hash: str, role: str) -> RegisteredUserDTO:
+        new_user = User(email=email, hash=hash, role=role, is_active=True)
         self._session.add(new_user)
         self._session.commit()
         return RegisteredUserDTO(
