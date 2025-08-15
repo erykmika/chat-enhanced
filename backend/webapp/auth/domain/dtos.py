@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from backend.webapp.auth.domain.enums import Role, LoginStatus
+from backend.webapp.auth.domain.enums import LoginStatus, Role
 
 
 class UserLoginInputDTO(BaseModel):

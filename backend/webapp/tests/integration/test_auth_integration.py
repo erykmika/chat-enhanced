@@ -1,11 +1,13 @@
 import pytest
 from argon2 import PasswordHasher
 
-from backend.webapp.auth.infrastructure.repository import UsersDatabaseRepository
-from backend.webapp.auth.domain.service import AuthenticationService
 from backend.webapp.auth.domain.dtos import UserLoginInputDTO
 from backend.webapp.auth.domain.enums import LoginStatus
+from backend.webapp.auth.domain.service import AuthenticationService
 from backend.webapp.auth.infrastructure.models import User
+from backend.webapp.auth.infrastructure.repository import (
+    UsersDatabaseRepository,
+)
 
 
 @pytest.fixture
@@ -26,7 +28,9 @@ def test_register_and_login_success(auth_service):
     assert user is not None
     assert user.email == email
     # Login
-    result = auth_service.login(UserLoginInputDTO(email=email, password=password))
+    result = auth_service.login(
+        UserLoginInputDTO(email=email, password=password)
+    )
     assert result.status == LoginStatus.successful
     assert result.user.email == email
 
@@ -44,7 +48,9 @@ def test_login_wrong_password(auth_service):
     email = "wrongpass@example.com"
     password = "rightpass"
     auth_service.register(email=email, password=password)
-    result = auth_service.login(UserLoginInputDTO(email=email, password="wrongpass"))
+    result = auth_service.login(
+        UserLoginInputDTO(email=email, password="wrongpass")
+    )
     assert result.status == LoginStatus.unauthorized
     assert result.user is None
 
@@ -62,7 +68,10 @@ def test_login_inactive_user(users_repo, auth_service):
     hasher = PasswordHasher()
     hashed_password = hasher.hash(password)
     user = User(
-        email="inactive@example.com", hash=hashed_password, role="user", is_active=False
+        email="inactive@example.com",
+        hash=hashed_password,
+        role="user",
+        is_active=False,
     )
     users_repo._session.add(user)
     users_repo._session.commit()

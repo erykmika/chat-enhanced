@@ -25,8 +25,12 @@ class UsersDatabaseRepository(UsersRepoInterface):
         else:
             return None
 
-    def create_user(self, email: str, hash: str, role: str) -> RegisteredUserDTO:
-        new_user = User(email=email, hash=hash, role=role, is_active=True)
+    def create_user(
+        self, email: str, password_hash: str, role: str
+    ) -> RegisteredUserDTO:
+        new_user = User(
+            email=email, hash=password_hash, role=role, is_active=True
+        )
         self._session.add(new_user)
         self._session.commit()
         return RegisteredUserDTO(

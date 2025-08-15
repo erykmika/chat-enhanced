@@ -1,1 +1,1 @@
-from .sql import db
+from .sql import db as db

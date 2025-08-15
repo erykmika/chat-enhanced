@@ -1,14 +1,27 @@
 from logging import getLogger
 
-from argon2 import PasswordHasher, exceptions as argon2_exceptions
+import jwt
+from argon2 import PasswordHasher
+from argon2 import exceptions as argon2_exceptions
 
 from backend.webapp.auth.domain.dtos import (
-    UserLoginInputDTO,
     AuthenticatedUserDTO,
     LoginResultDTO,
+    UserLoginInputDTO,
 )
 from backend.webapp.auth.domain.enums import LoginStatus
 from backend.webapp.auth.domain.users import UsersRepoInterface
+
+
+class JwtService:
+    def __init__(self, secret_key: str) -> None:
+        self._secret_key = secret_key
+
+    def encode(self, payload: dict) -> str:
+        return jwt.encode(payload, self._secret_key, algorithm="HS256")
+
+    def decode(self, token: str) -> dict:
+        return jwt.decode(token, self._secret_key, algorithms=["HS256"])
 
 
 class AuthenticationService:
@@ -30,7 +43,9 @@ class AuthenticationService:
         auth_user = AuthenticatedUserDTO(email=user.email, role=user.role)
         return LoginResultDTO(status=LoginStatus.successful, user=auth_user)
 
-    def register(self, email: str, password: str) -> AuthenticatedUserDTO | None:
+    def register(
+        self, email: str, password: str
+    ) -> AuthenticatedUserDTO | None:
         # Check if user already exists
         if self._users_repo.get_user_by_email(email):
             return None
@@ -38,6 +53,6 @@ class AuthenticationService:
         password_hash = hasher.hash(password)
         # Create user with default role 'user'
         user = self._users_repo.create_user(
-            email=email, hash=password_hash, role="user"
+            email=email, password_hash=password_hash, role="user"
         )
         return AuthenticatedUserDTO(email=user.email, role=user.role)
