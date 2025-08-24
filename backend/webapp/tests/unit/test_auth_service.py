@@ -133,3 +133,34 @@ def test_register_should_return_authenticated_user_dto():
     )
     result = service.register(email=EMAIL, password=PASSWORD)
     assert result is None
+
+
+def test_register_rejects_invalid_email():
+    repo = MockUsersRepo()
+    repo.get_user_by_email = Mock(return_value=None)
+    repo.create_user = Mock()
+    service = AuthenticationService(repo)
+
+    invalid_emails = [
+        "plainaddress",
+        "@missingusername.com",
+        "username@.com",
+        "username@domain",
+        "username@domain,com",
+        "username@domain..com",
+    ]
+    for email in invalid_emails:
+        result = service.register(email=email, password="irrelevant")
+        assert result is None, f"Should reject invalid email: {email}"
+        repo.create_user.assert_not_called()
+
+    valid_email = "valid.user@example.com"
+    repo.create_user.return_value = RegisteredUserDTO(
+        email=valid_email,
+        password_hash="irrelevant",
+        role=Role("user"),
+        is_active=True,
+    )
+    result = service.register(email=valid_email, password="irrelevant")
+    assert result is not None, "Should accept valid email"
+    assert result.email == valid_email
