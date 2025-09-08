@@ -1,8 +1,4 @@
-POSTGRES_CONTAINER_NAME=dev-postgres
-POSTGRES_DB=devdb
-POSTGRES_USER=devuser
-POSTGRES_PASSWORD=devpass
-POSTGRES_PORT=5432
+include .env
 
 .PHONY: db-up db-down db-remove
 
@@ -14,4 +10,3 @@ db-down:
 
 db-remove:
 	docker rm $(POSTGRES_CONTAINER_NAME)
-

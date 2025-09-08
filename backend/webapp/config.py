@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_SECRET = os.getenv("JWT_SECRET", "123somerandomjwtsecret123")
 
 POSTGRES_DB = os.getenv("POSTGRES_DB", "devdb")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "devuser")
