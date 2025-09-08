@@ -1,0 +1,53 @@
+from flask import Blueprint, Response, jsonify, request
+from pydantic import ValidationError
+
+from backend.webapp.auth.domain.dtos import UserLoginInputDTO
+from backend.webapp.auth.domain.enums import LoginStatus
+from backend.webapp.auth.domain.service import (
+    AuthenticationService,
+    JwtService,
+)
+from backend.webapp.auth.infrastructure.repository import (
+    UsersDatabaseRepository,
+)
+from backend.webapp.config import JWT_SECRET
+from backend.webapp.database import db
+
+auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+
+def get_auth_service() -> AuthenticationService:
+    return AuthenticationService(UsersDatabaseRepository(db.session))
+
+
+def get_jwt_service() -> JwtService:
+    assert JWT_SECRET
+    return JwtService(JWT_SECRET)
+
+
+@auth_bp.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    try:
+        login_dto = UserLoginInputDTO(**data)
+    except ValidationError:
+        return Response(status=400)
+
+    result = get_auth_service().login(login_dto)
+    if result.status != LoginStatus.successful:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    token = get_jwt_service().encode(
+        {"email": result.user.email, "role": result.user.role}
+    )
+    return jsonify({"access_token": token})
+
+
+@auth_bp.route("/register", methods=["POST"])
+def register():
+    data = request.get_json()
+    user = get_auth_service().register(data["email"], data["password"])
+    if not user:
+        return jsonify({"error": "User already exists"}), 400
+    token = get_jwt_service().encode({"email": user.email, "role": user.role})
+    return jsonify({"access_token": token})
