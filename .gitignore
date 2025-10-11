@@ -1,0 +1,5 @@
+.*
+!.env.example
+!.gitignore
+!.github
+!.pre-commit-config.yaml
