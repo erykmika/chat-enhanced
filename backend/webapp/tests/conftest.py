@@ -1,19 +1,18 @@
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
 
-from backend.webapp.database.sql import Base
+from backend.webapp.database.sql import db
 
 
 @pytest.fixture(scope="session")
 def sql_session():
-    engine = create_engine("sqlite:///:memory:", echo=True)
-    Base.metadata.create_all(engine)
+    engine = create_engine("sqlite://", echo=True)
+    db.metadata.create_all(engine)
     maker = sessionmaker(bind=engine)
-    session = maker()
+    Session = scoped_session(maker)
     try:
-        yield session
-        session.rollback()
+        yield Session
     finally:
-        session.close()
-        Base.metadata.drop_all(engine)
+        Session.remove()
+        db.metadata.drop_all(engine)
