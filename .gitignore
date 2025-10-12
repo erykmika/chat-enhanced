@@ -3,3 +3,4 @@
 !.gitignore
 !.github
 !.pre-commit-config.yaml
+*__pycache__
