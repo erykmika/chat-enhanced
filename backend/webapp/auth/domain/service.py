@@ -8,9 +8,10 @@ from argon2 import exceptions as argon2_exceptions
 from backend.webapp.auth.domain.dtos import (
     AuthenticatedUserDTO,
     LoginResultDTO,
+    RegistrationResultDto,
     UserLoginInputDTO,
 )
-from backend.webapp.auth.domain.enums import LoginStatus
+from backend.webapp.auth.domain.enums import LoginStatus, RegistrationStatus
 from backend.webapp.auth.domain.users import UsersRepoInterface
 
 
@@ -52,16 +53,19 @@ class AuthenticationService:
         pattern = r"^(?!.*\.\.)[\w\.-]+@[\w\.-]+\.\w+$"
         return re.match(pattern, email) is not None
 
-    def register(
-        self, email: str, password: str
-    ) -> AuthenticatedUserDTO | None:
-        if not self.is_valid_email(
-            email
-        ) or self._users_repo.get_user_by_email(email):
-            return None
+    def register(self, email: str, password: str) -> RegistrationResultDto:
+        if not self.is_valid_email(email):
+            return RegistrationResultDto(
+                status=RegistrationStatus.failure,
+                reason="user with this email already exists",
+            )
+        if self._users_repo.get_user_by_email(email):
+            return RegistrationResultDto(
+                status=RegistrationStatus.failure, reason="invalid email"
+            )
         hasher = PasswordHasher()
         password_hash = hasher.hash(password)
-        user = self._users_repo.create_user(
+        self._users_repo.create_user(
             email=email, password_hash=password_hash, role="user"
         )
-        return AuthenticatedUserDTO(email=user.email, role=user.role)
+        return RegistrationResultDto(status=RegistrationStatus.success)

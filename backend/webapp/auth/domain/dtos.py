@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
-from backend.webapp.auth.domain.enums import LoginStatus, Role
+from backend.webapp.auth.domain.enums import (
+    LoginStatus,
+    RegistrationStatus,
+    Role,
+)
 
 
 class UserLoginInputDTO(BaseModel):
@@ -23,3 +27,8 @@ class AuthenticatedUserDTO(BaseModel):
 class LoginResultDTO(BaseModel):
     status: LoginStatus
     user: AuthenticatedUserDTO | None = None
+
+
+class RegistrationResultDto(BaseModel):
+    status: RegistrationStatus
+    reason: str | None = None

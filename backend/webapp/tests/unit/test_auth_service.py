@@ -9,7 +9,11 @@ from backend.webapp.auth.domain.dtos import (
     RegisteredUserDTO,
     UserLoginInputDTO,
 )
-from backend.webapp.auth.domain.enums import LoginStatus, Role
+from backend.webapp.auth.domain.enums import (
+    LoginStatus,
+    RegistrationStatus,
+    Role,
+)
 from backend.webapp.auth.domain.service import AuthenticationService
 from backend.webapp.auth.domain.users import UsersRepoInterface
 
@@ -101,7 +105,7 @@ def test_login_should_return_none_for_invalid_credentials():
     assert result.user is None
 
 
-def test_register_should_return_authenticated_user_dto():
+def test_registration_should_return_dto_with_status():
     repo = MockUsersRepo()
     service = AuthenticationService(repo)
     EMAIL = "newuser@example.com"
@@ -119,8 +123,7 @@ def test_register_should_return_authenticated_user_dto():
     )
     result = service.register(email=EMAIL, password=PASSWORD)
     assert result is not None
-    assert result.email == EMAIL
-    assert result.role == Role("user")
+    assert result.status == RegistrationStatus.success
 
     # Simulate user already exists
     repo.get_user_by_email = Mock(
@@ -132,10 +135,10 @@ def test_register_should_return_authenticated_user_dto():
         )
     )
     result = service.register(email=EMAIL, password=PASSWORD)
-    assert result is None
+    assert result.status == RegistrationStatus.failure
 
 
-def test_register_rejects_invalid_email():
+def test_registration_rejects_invalid_email():
     repo = MockUsersRepo()
     repo.get_user_by_email = Mock(return_value=None)
     repo.create_user = Mock()
@@ -151,7 +154,7 @@ def test_register_rejects_invalid_email():
     ]
     for email in invalid_emails:
         result = service.register(email=email, password="irrelevant")
-        assert result is None, f"Should reject invalid email: {email}"
+        assert result.status == RegistrationStatus.failure
         repo.create_user.assert_not_called()
 
     valid_email = "valid.user@example.com"
@@ -162,5 +165,4 @@ def test_register_rejects_invalid_email():
         is_active=True,
     )
     result = service.register(email=valid_email, password="irrelevant")
-    assert result is not None, "Should accept valid email"
-    assert result.email == valid_email
+    assert result.status == RegistrationStatus.success

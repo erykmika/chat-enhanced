@@ -2,7 +2,7 @@ from flask import Blueprint, Response, jsonify, request
 from pydantic import ValidationError
 
 from backend.webapp.auth.domain.dtos import UserLoginInputDTO
-from backend.webapp.auth.domain.enums import LoginStatus
+from backend.webapp.auth.domain.enums import LoginStatus, RegistrationStatus
 from backend.webapp.auth.domain.service import (
     AuthenticationService,
     JwtService,
@@ -46,8 +46,7 @@ def login():
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
-    user = get_auth_service().register(data["email"], data["password"])
-    if not user:
-        return jsonify({"error": "User already exists"}), 400
-    token = get_jwt_service().encode({"email": user.email, "role": user.role})
-    return jsonify({"access_token": token})
+    result = get_auth_service().register(data["email"], data["password"])
+    if result.status == RegistrationStatus.failure:
+        return jsonify({"error": result.reason}), 400
+    return jsonify({"message": "success"}), 201

@@ -2,7 +2,7 @@ import pytest
 from argon2 import PasswordHasher
 
 from backend.webapp.auth.domain.dtos import UserLoginInputDTO
-from backend.webapp.auth.domain.enums import LoginStatus
+from backend.webapp.auth.domain.enums import LoginStatus, RegistrationStatus
 from backend.webapp.auth.domain.service import AuthenticationService
 from backend.webapp.auth.infrastructure.models import User
 from backend.webapp.auth.infrastructure.repository import (
@@ -24,9 +24,8 @@ def test_register_and_login_success(auth_service):
     email = "integration@example.com"
     password = "testpass"
     # Register
-    user = auth_service.register(email=email, password=password)
-    assert user is not None
-    assert user.email == email
+    result = auth_service.register(email=email, password=password)
+    assert result.status == RegistrationStatus.success
     # Login
     result = auth_service.login(
         UserLoginInputDTO(email=email, password=password)
@@ -38,10 +37,10 @@ def test_register_and_login_success(auth_service):
 def test_register_duplicate(auth_service):
     email = "dupe@example.com"
     password = "testpass"
-    user1 = auth_service.register(email=email, password=password)
-    user2 = auth_service.register(email=email, password=password)
-    assert user1 is not None
-    assert user2 is None
+    result1 = auth_service.register(email=email, password=password)
+    result2 = auth_service.register(email=email, password=password)
+    assert result1.status == RegistrationStatus.success
+    assert result2.status == RegistrationStatus.failure
 
 
 def test_login_wrong_password(auth_service):
