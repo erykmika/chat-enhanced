@@ -11,4 +11,14 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
-#### Running alembic TODO
+### Running alembic
+
+```
+alembic check
+alembic upgrade head
+```
+
+#### Creating a new migration
+```
+alembic --autogenerate -m "<msg>"
+```
