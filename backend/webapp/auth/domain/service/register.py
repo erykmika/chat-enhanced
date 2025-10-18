@@ -19,12 +19,12 @@ class RegistrationService:
     def register(self, email: str, password: str) -> RegistrationResultDto:
         if not self.is_valid_email(email):
             return RegistrationResultDto(
-                status=RegistrationStatus.failure,
-                reason="user with this email already exists",
+                status=RegistrationStatus.failure, reason="invalid email"
             )
         if self._users_repo.get_user_by_email(email):
             return RegistrationResultDto(
-                status=RegistrationStatus.failure, reason="invalid email"
+                status=RegistrationStatus.failure,
+                reason="user with this email already exists",
             )
         hasher = PasswordHasher()
         password_hash = hasher.hash(password)
