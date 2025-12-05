@@ -10,6 +10,6 @@ class UsersRepoInterface(ABC):
 
     @abstractmethod
     def create_user(
-        self, email: str, password_hash: str, role: str
+        self, email: str, password_hash: str, role: str, is_active: bool
     ) -> RegisteredUserDTO:
         pass

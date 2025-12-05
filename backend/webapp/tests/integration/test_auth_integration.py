@@ -36,8 +36,8 @@ def test_register_and_login_success(login_service, register_service):
     result = login_service.login(
         UserLoginInputDTO(email=email, password=password)
     )
-    assert result.status == LoginStatus.successful
-    assert result.user.email == email
+    assert result.status == LoginStatus.email_unverified
+    assert result.user is None
 
 
 def test_register_duplicate(register_service):

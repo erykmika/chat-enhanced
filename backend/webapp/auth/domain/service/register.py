@@ -29,6 +29,9 @@ class RegistrationService:
         hasher = PasswordHasher()
         password_hash = hasher.hash(password)
         self._users_repo.create_user(
-            email=email, password_hash=password_hash, role="user"
+            email=email,
+            password_hash=password_hash,
+            role="user",
+            is_active=False,
         )
         return RegistrationResultDto(status=RegistrationStatus.success)
