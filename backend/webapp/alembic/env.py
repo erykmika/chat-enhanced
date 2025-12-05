@@ -21,6 +21,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 
+from backend.webapp.auth.infrastructure.models import *  # noqa
+
 # target_metadata = mymodel.Base.metadata
 
 target_metadata = db.metadata
