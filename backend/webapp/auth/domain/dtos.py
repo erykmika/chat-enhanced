@@ -32,3 +32,8 @@ class LoginResultDTO(BaseModel):
 class RegistrationResultDto(BaseModel):
     status: RegistrationStatus
     reason: str | None = None
+
+
+class UserConfirmationInput(BaseModel):
+    email: str
+    token: str

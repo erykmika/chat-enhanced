@@ -1,11 +1,14 @@
 import pytest
 from argon2 import PasswordHasher
+from sqlalchemy import select
 
-from backend.webapp.auth.domain.dtos import UserLoginInputDTO
+from backend.webapp.auth.domain.dtos import (
+    UserConfirmationInput,
+    UserLoginInputDTO,
+)
 from backend.webapp.auth.domain.enums import LoginStatus, RegistrationStatus
 from backend.webapp.auth.domain.service.login import LoginService
-from backend.webapp.auth.domain.service.register import RegistrationService
-from backend.webapp.auth.infrastructure.models import User
+from backend.webapp.auth.infrastructure.models import Confirmation, User
 from backend.webapp.auth.infrastructure.repository import (
     UsersDatabaseRepository,
 )
@@ -19,11 +22,6 @@ def users_repo(sql_session):
 @pytest.fixture
 def login_service(users_repo):
     return LoginService(users_repo)
-
-
-@pytest.fixture
-def register_service(users_repo):
-    return RegistrationService(users_repo)
 
 
 def test_register_and_login_success(login_service, register_service):
@@ -85,3 +83,26 @@ def test_login_inactive_user(users_repo, login_service):
     )
     assert result.status == LoginStatus.email_unverified
     assert result.user is None
+
+
+def test_confirmed_user_token_is_stored(confirm_service, sql_session):
+    email = "xyz@mail.eu"
+    confirm_service.send_confirmation(email=email)
+    result = sql_session.execute(
+        select(Confirmation).where(Confirmation.email == email)
+    ).scalar_one_or_none()
+    assert result.email == email
+    assert result.token
+
+
+def test_stored_user_token_is_used_to_confirm_user(
+    confirm_service, sql_session
+):
+    mail = "test@mail.eu"
+    token = "123"
+    sql_session.add(Confirmation(email=mail, token=token))
+    sql_session.commit()
+    assert (
+        confirm_service.confirm(UserConfirmationInput(email=mail, token=token))
+        is True
+    )

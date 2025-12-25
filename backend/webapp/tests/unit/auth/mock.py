@@ -1,7 +1,7 @@
 # type: ignore
 
 from backend.webapp.auth.domain.dtos import RegisteredUserDTO
-from backend.webapp.auth.domain.users import UsersRepoInterface
+from backend.webapp.auth.domain.ports import UsersRepoInterface
 
 
 class MockUsersRepo(UsersRepoInterface):

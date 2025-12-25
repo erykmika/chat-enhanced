@@ -12,3 +12,9 @@ class User(db.Model):
     is_active: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
+
+
+class Confirmation(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    token: Mapped[str] = mapped_column(String, nullable=False)

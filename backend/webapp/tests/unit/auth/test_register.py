@@ -11,9 +11,15 @@ from backend.webapp.auth.domain.service.register import RegistrationService
 from backend.webapp.tests.unit.auth.mock import MockUsersRepo  # type: ignore
 
 
-def test_registration_should_return_dto_with_status():
+def test_registration_should_return_dto_with_status(
+    confirm_repo, delivery_service
+):
     repo = MockUsersRepo()
-    service = RegistrationService(repo)
+    service = RegistrationService(
+        repo,
+        confirmation_repository=confirm_repo,
+        delivery_service=delivery_service,
+    )
     EMAIL = "newuser@example.com"
     PASSWORD = "securepass"
 
@@ -44,11 +50,15 @@ def test_registration_should_return_dto_with_status():
     assert result.status == RegistrationStatus.failure
 
 
-def test_registration_rejects_invalid_email():
+def test_registration_rejects_invalid_email(delivery_service, confirm_repo):
     repo = MockUsersRepo()
     repo.get_user_by_email = Mock(return_value=None)
     repo.create_user = Mock()
-    service = RegistrationService(repo)
+    service = RegistrationService(
+        repo,
+        delivery_service=delivery_service,
+        confirmation_repository=confirm_repo,
+    )
 
     invalid_emails = [
         "plainaddress",

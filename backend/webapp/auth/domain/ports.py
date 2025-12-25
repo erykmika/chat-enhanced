@@ -13,3 +13,19 @@ class UsersRepoInterface(ABC):
         self, email: str, password_hash: str, role: str, is_active: bool
     ) -> RegisteredUserDTO:
         pass
+
+
+class ConfirmationRepoInterface(ABC):
+    @abstractmethod
+    def store_token_for_user(self, email: str, token: str) -> None:
+        pass
+
+    @abstractmethod
+    def get_token_for_user(self, email: str) -> str | None:
+        pass
+
+
+class UserConfirmationDeliveryInterface(ABC):
+    @abstractmethod
+    def send_confirmation(self, email: str, token: str) -> None:
+        pass

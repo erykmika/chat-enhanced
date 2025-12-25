@@ -3,8 +3,11 @@ from sqlalchemy import select
 
 from backend.webapp.auth.domain.dtos import RegisteredUserDTO
 from backend.webapp.auth.domain.enums import Role
-from backend.webapp.auth.domain.users import UsersRepoInterface
-from backend.webapp.auth.infrastructure.models import User
+from backend.webapp.auth.domain.ports import (
+    ConfirmationRepoInterface,
+    UsersRepoInterface,
+)
+from backend.webapp.auth.infrastructure.models import Confirmation, User
 
 
 class UsersDatabaseRepository(UsersRepoInterface):
@@ -39,3 +42,17 @@ class UsersDatabaseRepository(UsersRepoInterface):
             password_hash=new_user.hash,
             is_active=new_user.is_active,
         )
+
+
+class ConfirmationDatabaseRepository(ConfirmationRepoInterface):
+    def __init__(self, session: Session) -> None:
+        self._session = session
+
+    def store_token_for_user(self, email: str, token: str) -> None:
+        self._session.add(Confirmation(email=email, token=token))
+        self._session.commit()
+
+    def get_token_for_user(self, email: str) -> str | None:
+        return self._session.execute(
+            select(Confirmation.token).where(Confirmation.email == email)
+        ).scalar_one_or_none()

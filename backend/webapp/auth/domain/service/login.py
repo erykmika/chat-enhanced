@@ -7,7 +7,7 @@ from backend.webapp.auth.domain.dtos import (
     UserLoginInputDTO,
 )
 from backend.webapp.auth.domain.enums import LoginStatus
-from backend.webapp.auth.domain.users import UsersRepoInterface
+from backend.webapp.auth.domain.ports import UsersRepoInterface
 
 
 class LoginService:
