@@ -11,6 +11,7 @@ app.config.update(FLASK_CONFIG)
 
 db.init_app(app)
 mailing.init_app(app)
+
 app.register_blueprint(auth_bp)
 
 

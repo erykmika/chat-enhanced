@@ -12,7 +12,7 @@ class UserConfirmationMailDelivery(UserConfirmationDeliveryInterface):
             recipients=[email],
             body=f"""
                 Use this link to confirm your account:
-                ${FRONTEND_ROOT_DOMAIN}/confirm/{token}
+                {FRONTEND_ROOT_DOMAIN}/confirm/{token}
                 """,
         )
         mailing.send(message)
