@@ -6,7 +6,11 @@ from backend.webapp.auth.domain.enums import LoginStatus, RegistrationStatus
 from backend.webapp.auth.domain.service.jwt import JwtService
 from backend.webapp.auth.domain.service.login import LoginService
 from backend.webapp.auth.domain.service.register import RegistrationService
+from backend.webapp.auth.infrastructure.external import (
+    UserConfirmationMailDelivery,
+)
 from backend.webapp.auth.infrastructure.repository import (
+    ConfirmationDatabaseRepository,
     UsersDatabaseRepository,
 )
 from backend.webapp.config import JWT_SECRET
@@ -40,10 +44,12 @@ def login():
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    data = request.get_json()
-    result = RegistrationService(UsersDatabaseRepository(db.session)).register(
-        data["email"], data["password"]
-    )
+    data: dict[str, str] = request.get_json()
+    result = RegistrationService(
+        UsersDatabaseRepository(db.session),
+        UserConfirmationMailDelivery(),
+        ConfirmationDatabaseRepository(db.session),
+    ).register(data["email"], data["password"])
     if result.status == RegistrationStatus.failure:
         return jsonify({"error": result.reason}), 400
-    return jsonify({"message": "success"}), 201
+    return jsonify({"message": "success, confirmation link sent"}), 201
