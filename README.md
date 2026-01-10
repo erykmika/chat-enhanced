@@ -20,5 +20,5 @@ alembic upgrade head
 
 #### Creating a new migration
 ```
-alembic --autogenerate -m "<msg>"
+alembic revision --autogenerate -m "<msg>"
 ```

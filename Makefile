@@ -13,3 +13,7 @@ db-down:
 
 db-remove:
 	docker rm $(POSTGRES_CONTAINER_NAME)
+
+test-mail:
+	docker run -d -p 1025:1025 -p 8025:8025 mailhog/mailhog
+
