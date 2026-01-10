@@ -39,6 +39,7 @@ class RegistrationService:
             return RegistrationResultDto(
                 status=RegistrationStatus.failure, reason="invalid email"
             )
+
         if self._users_repo.get_user_by_email(email):
             return RegistrationResultDto(
                 status=RegistrationStatus.failure,
