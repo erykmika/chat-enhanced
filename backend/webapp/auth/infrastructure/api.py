@@ -1,8 +1,14 @@
+from typing import Any
+
 from flask import Blueprint, Response, jsonify, request
 from pydantic import ValidationError
 
-from backend.webapp.auth.domain.dtos import UserLoginInputDTO
+from backend.webapp.auth.domain.dtos import (
+    UserConfirmationInput,
+    UserLoginInputDTO,
+)
 from backend.webapp.auth.domain.enums import LoginStatus, RegistrationStatus
+from backend.webapp.auth.domain.service.confirm import UserConfirmationService
 from backend.webapp.auth.domain.service.jwt import JwtService
 from backend.webapp.auth.domain.service.login import LoginService
 from backend.webapp.auth.domain.service.register import RegistrationService
@@ -44,12 +50,41 @@ def login():
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    data: dict[str, str] = request.get_json()
+    data: dict[str, Any] = request.get_json()  # type: ignore
+
+    try:
+        email, password = data["email"], data["password"]
+    except KeyError:
+        return jsonify({"error": "invalid credentials"}, 400)
+
     result = RegistrationService(
         UsersDatabaseRepository(db.session),
         UserConfirmationMailDelivery(),
         ConfirmationDatabaseRepository(db.session),
-    ).register(data["email"], data["password"])
+    ).register(email, password)
+
     if result.status == RegistrationStatus.failure:
         return jsonify({"error": result.reason}), 400
-    return jsonify({"message": "success, confirmation link sent"}), 201
+    else:
+        return jsonify({"message": "success, confirmation link sent"}), 201
+
+
+@auth_bp.route("/confirm", methods=["POST"])
+def confirm():
+    """Confirm user creation using a token"""
+    data: dict[str, Any] = request.get_json()  # type: ignore
+
+    try:
+        email, token = data["email"], data["token"]
+    except KeyError:
+        return jsonify({"error": "invalid data"}), 400
+
+    result = UserConfirmationService(
+        delivery_service=UserConfirmationMailDelivery(),
+        repository=ConfirmationDatabaseRepository(db.session),
+    ).confirm(input_dto=UserConfirmationInput(email=email, token=token))
+
+    if result.success:
+        return jsonify({"message": "success"}), 200
+    else:
+        return jsonify({"message": "failure", "reason": result.reason}), 400

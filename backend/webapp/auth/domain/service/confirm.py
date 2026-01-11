@@ -1,15 +1,14 @@
 import uuid
 from logging import getLogger
 
-from backend.webapp.auth.domain.dtos import UserConfirmationInput
+from backend.webapp.auth.domain.dtos import (
+    UserConfirmationInput,
+    UserConfirmationOutput,
+)
 from backend.webapp.auth.domain.ports import (
     ConfirmationRepoInterface,
     UserConfirmationDeliveryInterface,
 )
-
-
-class UserConfirmationException(Exception):
-    pass
 
 
 class UserConfirmationService:
@@ -27,12 +26,32 @@ class UserConfirmationService:
         self._repo.store_token_for_user(email, token)
         self._delivery.send_confirmation(email, token)
 
-    def confirm(self, input_dto: UserConfirmationInput) -> bool:
+    def confirm(
+        self, input_dto: UserConfirmationInput
+    ) -> UserConfirmationOutput:
         stored_token = self._repo.get_token_for_user(email=input_dto.email)
 
         if stored_token is None:
-            raise UserConfirmationException("user not found")
+            return UserConfirmationOutput(
+                success=False, reason="confirmation not found"
+            )
 
-        if stored_token == input_dto.token:
-            return True
-        return False
+        if stored_token != input_dto.token:
+            return UserConfirmationOutput(
+                success=False, reason="invalid token"
+            )
+
+        try:
+            self._repo.activate_user(email=input_dto.email)
+        except ValueError:
+            return UserConfirmationOutput(
+                success=False, reason="user not found"
+            )
+
+        self._logger.info("removing token")
+
+        self._repo.remove_confirmation_token(email=input_dto.email)
+
+        self._logger.warning("token removed")
+
+        return UserConfirmationOutput(success=True)

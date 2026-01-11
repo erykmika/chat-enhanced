@@ -37,3 +37,8 @@ class RegistrationResultDto(BaseModel):
 class UserConfirmationInput(BaseModel):
     email: str
     token: str
+
+
+class UserConfirmationOutput(BaseModel):
+    success: bool
+    reason: str | None = None

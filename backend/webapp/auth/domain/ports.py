@@ -24,6 +24,14 @@ class ConfirmationRepoInterface(ABC):
     def get_token_for_user(self, email: str) -> str | None:
         pass
 
+    @abstractmethod
+    def activate_user(self, email: str) -> None:
+        pass
+
+    @abstractmethod
+    def remove_confirmation_token(self, email: str) -> None:
+        pass
+
 
 class UserConfirmationDeliveryInterface(ABC):
     @abstractmethod

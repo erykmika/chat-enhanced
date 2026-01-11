@@ -1,5 +1,5 @@
 from flask_sqlalchemy.session import Session
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from backend.webapp.auth.domain.dtos import RegisteredUserDTO
 from backend.webapp.auth.domain.enums import Role
@@ -48,6 +48,11 @@ class ConfirmationDatabaseRepository(ConfirmationRepoInterface):
     def __init__(self, session: Session) -> None:
         self._session = session
 
+    def _get_user(self, email: str) -> User | None:
+        return self._session.execute(
+            select(User).where(User.email == email)
+        ).scalar_one_or_none()
+
     def store_token_for_user(self, email: str, token: str) -> None:
         self._session.add(Confirmation(email=email, token=token))
         self._session.commit()
@@ -56,3 +61,18 @@ class ConfirmationDatabaseRepository(ConfirmationRepoInterface):
         return self._session.execute(
             select(Confirmation.token).where(Confirmation.email == email)
         ).scalar_one_or_none()
+
+    def activate_user(self, email: str) -> None:
+        user = self._get_user(email)
+        if user is None:
+            raise ValueError("user not found")
+        else:
+            user.is_active = True
+            self._session.commit()
+            return None
+
+    def remove_confirmation_token(self, email: str) -> None:
+        self._session.execute(
+            delete(Confirmation).where(Confirmation.email == email)
+        )
+        self._session.commit()

@@ -6,7 +6,11 @@ from backend.webapp.auth.domain.dtos import (
     UserConfirmationInput,
     UserLoginInputDTO,
 )
-from backend.webapp.auth.domain.enums import LoginStatus, RegistrationStatus
+from backend.webapp.auth.domain.enums import (
+    LoginStatus,
+    RegistrationStatus,
+    Role,
+)
 from backend.webapp.auth.domain.service.login import LoginService
 from backend.webapp.auth.infrastructure.models import Confirmation, User
 from backend.webapp.auth.infrastructure.repository import (
@@ -73,7 +77,7 @@ def test_login_inactive_user(users_repo, login_service):
     user = User(
         email="inactive@example.com",
         hash=hashed_password,
-        role="user",
+        role=Role.user,
         is_active=False,
     )
     users_repo._session.add(user)
@@ -100,9 +104,14 @@ def test_stored_user_token_is_used_to_confirm_user(
 ):
     mail = "test@mail.eu"
     token = "123"
+    sql_session.add(
+        User(email=mail, hash="212121212", role=Role.user, is_active=False)
+    )
     sql_session.add(Confirmation(email=mail, token=token))
     sql_session.commit()
     assert (
-        confirm_service.confirm(UserConfirmationInput(email=mail, token=token))
+        confirm_service.confirm(
+            UserConfirmationInput(email=mail, token=token)
+        ).success
         is True
     )
