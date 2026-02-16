@@ -31,4 +31,9 @@ async function login(email, password) {
     return await request(url, 'POST', { email, password });
 }
 
-export { login, request, API_BASE_URL };
+async function register(email, password) {
+    const url = `${API_BASE_URL}/auth/register`;
+    return await request(url, 'POST', { email, password });
+}
+
+export { login, register, request, API_BASE_URL };
