@@ -6,3 +6,4 @@ argon2-cffi~=25.1.0
 psycopg2-binary~=2.9.10
 pyjwt~=2.10.1
 flask-mail~=0.10.0
+flask-cors~=6.0.2

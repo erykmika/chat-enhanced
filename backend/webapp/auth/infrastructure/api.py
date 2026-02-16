@@ -55,7 +55,7 @@ def register():
     try:
         email, password = data["email"], data["password"]
     except KeyError:
-        return jsonify({"error": "invalid credentials"}, 400)
+        return jsonify({"error": "invalid credentials"}), 400
 
     result = RegistrationService(
         UsersDatabaseRepository(db.session),
