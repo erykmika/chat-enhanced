@@ -1,8 +1,8 @@
 from flask_mail import Message
 
-from backend.mails import mailing
 from backend.webapp.auth.domain.ports import UserConfirmationDeliveryInterface
 from backend.webapp.config import FRONTEND_ROOT_DOMAIN
+from backend.webapp.mails import mailing
 
 
 class UserConfirmationMailDelivery(UserConfirmationDeliveryInterface):
