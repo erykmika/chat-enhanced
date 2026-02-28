@@ -24,14 +24,5 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r backend/requirements.txt
-          pip install -r backend/requirements-dev.txt
-
-      - name: Run ruff lint
-        run: |
-          ruff check backend/webapp
-
-      - name: Run pytest
-        run: |
-          pytest backend/webapp/tests
-
+          # Install runtime + dev tools from pyproject.toml
+          pip install -e ".[dev]"

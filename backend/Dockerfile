@@ -9,9 +9,14 @@ RUN apt-get update \
 # Ensure we run from the project root so `backend` is importable.
 WORKDIR /app
 
-# Install deps first for better layer caching.
-COPY backend/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml ./pyproject.toml
+COPY README.md ./README.md
+
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir build \
+    && python -m build --wheel --outdir /tmp/dist \
+    && pip install --no-cache-dir /tmp/dist/*.whl \
+    && rm -rf /tmp/dist
 
 # Copy backend package into the image (keep /app as import root).
 COPY backend/ /app/backend/

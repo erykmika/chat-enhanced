@@ -6,9 +6,9 @@
 uv venv
 uv pip install pre-commit
 pre-commit install
-cd backend
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
+
+# Install backend deps from pyproject.toml
+pip install -e ".[dev]"
 ```
 
 ## Docker (frontend + backend + Postgres)

@@ -1,3 +1,33 @@
+[project]
+name = "chat-enhanced"
+version = "0.0.0"
+description = "Real-time chat web app"
+readme = "README.md"
+requires-python = ">=3.13"
+
+dependencies = [
+  "flask~=3.1.1",
+  "python-dotenv~=1.1.1",
+  "flask-sqlalchemy~=3.1.1",
+  "pydantic~=2.11.7",
+  "argon2-cffi~=25.1.0",
+  "psycopg2-binary~=2.9.10",
+  "pyjwt~=2.10.1",
+  "flask-mail~=0.10.0",
+  "flask-cors~=6.0.2",
+  "gunicorn~=22.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest~=8.4.1",
+  "ruff~=0.12.9",
+  "pre-commit~=4.3.0",
+  "alembic~=1.16.5",
+]
+
+# Keep tooling configuration below.
+
 [tool.ruff]
 line-length = 79
 
