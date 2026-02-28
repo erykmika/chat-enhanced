@@ -12,16 +12,25 @@ WORKDIR /app
 COPY pyproject.toml ./pyproject.toml
 COPY README.md ./README.md
 
+# Alembic config is stored at repo root and used by the entrypoint.
+COPY alembic.ini ./alembic.ini
+
+# The wheel build needs the package sources present.
+COPY backend/ ./backend/
+
+# Copy entrypoint that runs Alembic migrations (optional) before starting the app.
+COPY backend/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir build \
     && python -m build --wheel --outdir /tmp/dist \
     && pip install --no-cache-dir /tmp/dist/*.whl \
     && rm -rf /tmp/dist
 
-# Copy backend package into the image (keep /app as import root).
-COPY backend/ /app/backend/
-
 ENV PYTHONUNBUFFERED=1
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Serve the Flask app via gunicorn. Use the fully-qualified module path.
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "backend.webapp.app:app", "--workers", "1"]

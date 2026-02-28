@@ -16,6 +16,7 @@ dependencies = [
   "flask-mail~=0.10.0",
   "flask-cors~=6.0.2",
   "gunicorn~=22.0",
+  "alembic~=1.18.4",
 ]
 
 [project.optional-dependencies]
@@ -23,7 +24,6 @@ dev = [
   "pytest~=8.4.1",
   "ruff~=0.12.9",
   "pre-commit~=4.3.0",
-  "alembic~=1.16.5",
 ]
 
 [build-system]

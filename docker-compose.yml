@@ -43,6 +43,13 @@ services:
     environment:
       JWT_SECRET: "dev-jwt-secret-change-me"
 
+      # Database (use compose service name, not localhost)
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-devdb}
+      POSTGRES_USER: ${POSTGRES_USER:-devuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpass}
+
       MAIL_SERVER: mail
       MAIL_PORT: "1025"
       MAIL_DEFAULT_SENDER: "chat@mail.int"
@@ -66,7 +73,7 @@ services:
       - "3000:80"
     environment:
       # Used at build time by Vite; pointing to backend service name works within the compose network.
-      - VITE_API_BASE_URL=http://backend:8000
+      - VITE_API_BASE_URL=http://localhost:8000
     depends_on:
       - backend
     healthcheck:
