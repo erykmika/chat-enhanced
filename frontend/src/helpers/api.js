@@ -59,4 +59,41 @@ async function confirmRegistration(email, token) {
     return await request(url, 'POST', { email, token });
 }
 
-export { login, register, confirmRegistration, request, API_BASE_URL };
+function getWsBaseUrl() {
+    // 1) Runtime-injected config (Docker/nginx)
+    if (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__.VITE_WS_BASE_URL) {
+        return window.__ENV__.VITE_WS_BASE_URL;
+    }
+
+    // 2) Vite dev/build-time env
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_WS_BASE_URL) {
+        return import.meta.env.VITE_WS_BASE_URL;
+    }
+
+    // 3) Derive from API base URL
+    if (API_BASE_URL.startsWith('https://')) {
+        return API_BASE_URL.replace('https://', 'wss://');
+    }
+
+    if (API_BASE_URL.startsWith('http://')) {
+        return API_BASE_URL.replace('http://', 'ws://');
+    }
+
+    // 4) Fallback for local dev
+    return 'ws://localhost:8001';
+}
+
+function getAccessToken() {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    return localStorage.getItem('access_token');
+}
+
+async function fetchChatUsers(token) {
+    const url = `${API_BASE_URL}/chat/users`;
+    return await request(url, 'GET', null, token);
+}
+
+export { login, register, confirmRegistration, request, API_BASE_URL, getWsBaseUrl, getAccessToken, fetchChatUsers };

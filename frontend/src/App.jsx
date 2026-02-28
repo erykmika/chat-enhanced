@@ -1,12 +1,21 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import SignIn from './views/SignIn'
 import SignUp from './views/SignUp'
 import ConfirmRegistration from './views/ConfirmRegistration'
+import Chat from './views/Chat'
 import './App.css'
 
 function RootAuth() {
   const [view, setView] = useState('signin')
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      navigate('/chat')
+    }
+  }, [navigate])
 
   if (view === 'signup') {
     return <SignUp onGoToSignIn={() => setView('signin')} />
@@ -40,6 +49,7 @@ function App() {
       <Routes>
         <Route path="/" element={<RootAuth />} />
         <Route path="/confirm/:token" element={<ConfirmRegistration />} />
+        <Route path="/chat" element={<Chat />} />
       </Routes>
     </BrowserRouter>
   )

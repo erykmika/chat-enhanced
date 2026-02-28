@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { login } from '../helpers/api';
 import './SignIn.css';
 
 function SignIn() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,13 +24,10 @@ function SignIn() {
       if (response.access_token) {
         localStorage.setItem('access_token', response.access_token);
         setSuccess(true);
-        
-        // You can redirect or update app state here
-        // For now, we'll just show success
+
         setTimeout(() => {
-          // Redirect logic can be added here when routing is set up
-          window.location.reload();
-        }, 1500);
+          navigate('/chat');
+        }, 500);
       } else {
         // Backend returned success but without access_token
         setError('Invalid response from server. Please try again or contact support.');

@@ -5,6 +5,7 @@ set -eu
 # This lets docker-compose `environment:` affect the app without rebuilding.
 
 : "${VITE_API_BASE_URL:=}"
+: "${VITE_WS_BASE_URL:=}"
 
 cat >/usr/share/nginx/html/env.js <<'EOF'
 // This file is generated at container start.
@@ -22,8 +23,11 @@ if [ -n "${VITE_API_BASE_URL}" ]; then
   printf 'window.__ENV__.VITE_API_BASE_URL = "%s";\n' "$(printf %s "${VITE_API_BASE_URL}" | escape_js_string)" >>/usr/share/nginx/html/env.js
 fi
 
+if [ -n "${VITE_WS_BASE_URL}" ]; then
+  printf 'window.__ENV__.VITE_WS_BASE_URL = "%s";\n' "$(printf %s "${VITE_WS_BASE_URL}" | escape_js_string)" >>/usr/share/nginx/html/env.js
+fi
+
 # Ensure env.js is not cached too aggressively by clients/proxies.
 # (Caching headers are also set in nginx.conf.)
 
 exec "$@"
-

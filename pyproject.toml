@@ -17,6 +17,7 @@ dependencies = [
   "flask-cors~=6.0.2",
   "gunicorn~=22.0",
   "alembic~=1.18.4",
+  "websockets~=13.1",
 ]
 
 [project.optional-dependencies]
@@ -36,7 +37,7 @@ package-dir = {"" = "backend"}
 [tool.setuptools.packages.find]
 where = ["backend"]
 include = ["*"]
-exclude = ["frontend*", "ws_server*"]
+exclude = ["frontend*"]
 
 # Keep tooling configuration below.
 

@@ -67,6 +67,22 @@ services:
       timeout: 5s
       retries: 5
 
+  ws_server:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8011:8001"
+    environment:
+      JWT_SECRET: "dev-jwt-secret-change-me"
+      WS_HOST: "0.0.0.0"
+      WS_PORT: "8001"
+      RUN_MIGRATIONS: "0"
+    command: ["python", "-m", "backend.ws_server.server"]
+
   frontend:
     build:
       context: ./frontend
@@ -77,6 +93,7 @@ services:
     environment:
       # Used at build time by Vite; pointing to backend service name works within the compose network.
       - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_WS_BASE_URL=ws://localhost:8011
     depends_on:
       - backend
     healthcheck:
