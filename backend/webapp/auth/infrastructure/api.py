@@ -1,9 +1,9 @@
 from typing import Any
 
+import jwt
 from flask import Blueprint, Response, jsonify, request
 from pydantic import ValidationError
 
-from backend.common.jwt import JwtService
 from backend.webapp.auth.domain.dtos import (
     UserConfirmationInput,
     UserLoginInputDTO,
@@ -25,11 +25,6 @@ from backend.webapp.database import db
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
-def get_jwt_service() -> JwtService:
-    assert JWT_SECRET
-    return JwtService(JWT_SECRET)
-
-
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -42,8 +37,11 @@ def login():
     if result.status != LoginStatus.successful:
         return jsonify({"error": "Unauthorized"}), 401
 
-    token = get_jwt_service().encode(
-        {"email": result.user.email, "role": result.user.role}
+    assert JWT_SECRET
+    token = jwt.encode(
+        {"email": result.user.email, "role": result.user.role},
+        JWT_SECRET,
+        algorithm="HS256",
     )
     return jsonify({"access_token": token})
 

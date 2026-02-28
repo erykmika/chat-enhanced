@@ -1,10 +1,10 @@
 from unittest.mock import Mock
 
+import jwt
 import pytest
 from flask import Flask
 from sqlalchemy import delete, select
 
-from backend.common.jwt import JwtService
 from backend.webapp.auth.domain.enums import Role
 from backend.webapp.auth.infrastructure.api import auth_bp
 from backend.webapp.auth.infrastructure.external import (
@@ -143,7 +143,11 @@ def test_confirmation_mail_contains_valid_confirmation_url(
 
 def _auth_header(email: str) -> dict[str, str]:
     assert JWT_SECRET
-    token = JwtService(JWT_SECRET).encode({"email": email, "role": Role.user})
+    token = jwt.encode(
+        {"email": email, "role": Role.user},
+        JWT_SECRET,
+        algorithm="HS256",
+    )
     return {"Authorization": f"Bearer {token}"}
 
 

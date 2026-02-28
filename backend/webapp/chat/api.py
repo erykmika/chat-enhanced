@@ -4,17 +4,11 @@ import jwt
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select
 
-from backend.common.jwt import JwtService
 from backend.webapp.auth.infrastructure.models import User
 from backend.webapp.config import JWT_SECRET
 from backend.webapp.database import db
 
 chat_bp = Blueprint("chat", __name__, url_prefix="/chat")
-
-
-def _get_jwt_service() -> JwtService:
-    assert JWT_SECRET
-    return JwtService(JWT_SECRET)
 
 
 def _get_bearer_token() -> str | None:
@@ -26,7 +20,8 @@ def _get_bearer_token() -> str | None:
 
 def _decode_token(token: str) -> dict[str, Any] | None:
     try:
-        return _get_jwt_service().decode(token)
+        assert JWT_SECRET
+        return jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     except jwt.InvalidTokenError:
         return None
 
