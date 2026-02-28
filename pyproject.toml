@@ -26,6 +26,18 @@ dev = [
   "alembic~=1.16.5",
 ]
 
+[build-system]
+requires = ["setuptools>=82", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "backend"}
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+include = ["*"]
+exclude = ["frontend*", "ws_server*"]
+
 # Keep tooling configuration below.
 
 [tool.ruff]
