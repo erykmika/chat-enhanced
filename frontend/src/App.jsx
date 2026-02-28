@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import SignIn from './views/SignIn'
 import SignUp from './views/SignUp'
+import ConfirmRegistration from './views/ConfirmRegistration'
 import './App.css'
 
-function App() {
+function RootAuth() {
   const [view, setView] = useState('signin')
 
   if (view === 'signup') {
@@ -29,6 +31,17 @@ function App() {
         </button>
       </div>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<RootAuth />} />
+        <Route path="/confirm/:token" element={<ConfirmRegistration />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

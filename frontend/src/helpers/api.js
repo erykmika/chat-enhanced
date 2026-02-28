@@ -54,4 +54,9 @@ async function register(email, password) {
     return await request(url, 'POST', { email, password });
 }
 
-export { login, register, request, API_BASE_URL };
+async function confirmRegistration(email, token) {
+    const url = `${API_BASE_URL}/auth/confirm`;
+    return await request(url, 'POST', { email, token });
+}
+
+export { login, register, confirmRegistration, request, API_BASE_URL };

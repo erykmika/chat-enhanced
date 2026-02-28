@@ -95,3 +95,43 @@ def test_confirmation_token_is_removed_user_is_active(client, sql_session):
         .scalar_one_or_none()
         .is_active
     )
+
+
+def test_confirmation_mail_contains_valid_confirmation_url(
+    client, monkeypatch
+):
+    sent = {}
+
+    def _fake_send_confirmation(self, email: str, token: str) -> None:  # noqa: ARG001
+        sent["email"] = email
+        sent["token"] = token
+
+    # Provide a realistic frontend base URL.
+    monkeypatch.setattr(
+        "backend.webapp.auth.infrastructure.external.FRONTEND_ROOT_DOMAIN",
+        "https://frontend.example",
+    )
+    monkeypatch.setattr(
+        UserConfirmationMailDelivery,
+        "send_confirmation",
+        _fake_send_confirmation,
+    )
+
+    # NOTE: RegistrationService uses a strict email regex that doesn't allow '+'.
+    email = "user.tag@mailservice.int"
+    response = client.post(
+        "/auth/register",
+        json={"email": email, "password": "12312121212121212121212"},
+    )
+    assert response.status_code == 201
+
+    from backend.webapp.auth.infrastructure.external import (
+        _build_confirmation_url,
+    )
+
+    url = _build_confirmation_url(
+        "https://frontend.example/", token=sent["token"], email=sent["email"]
+    )
+    assert url.startswith("https://frontend.example/confirm/")
+    assert "?email=" in url
+    assert "user.tag%40mailservice.int" in url
