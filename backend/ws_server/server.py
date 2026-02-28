@@ -11,7 +11,7 @@ import jwt
 from websockets.exceptions import ConnectionClosed
 from websockets.server import WebSocketServerProtocol, serve
 
-from backend.webapp.auth.domain.service.jwt import JwtService
+from backend.common.jwt import JwtService
 
 logger = logging.getLogger(__name__)
 

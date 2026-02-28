@@ -4,7 +4,7 @@ import jwt
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select
 
-from backend.webapp.auth.domain.service.jwt import JwtService
+from backend.common.jwt import JwtService
 from backend.webapp.auth.infrastructure.models import User
 from backend.webapp.config import JWT_SECRET
 from backend.webapp.database import db

@@ -2,14 +2,17 @@ from unittest.mock import Mock
 
 import pytest
 from flask import Flask
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
+from backend.common.jwt import JwtService
 from backend.webapp.auth.domain.enums import Role
 from backend.webapp.auth.infrastructure.api import auth_bp
 from backend.webapp.auth.infrastructure.external import (
     UserConfirmationMailDelivery,
 )
 from backend.webapp.auth.infrastructure.models import Confirmation, User
+from backend.webapp.chat.api import chat_bp
+from backend.webapp.config import JWT_SECRET
 from backend.webapp.database import db
 
 
@@ -25,6 +28,7 @@ def app(sql_session):
     db.init_app(app)
     db.session = sql_session
     app.register_blueprint(auth_bp)
+    app.register_blueprint(chat_bp)
 
     yield app
 
@@ -135,3 +139,51 @@ def test_confirmation_mail_contains_valid_confirmation_url(
     assert url.startswith("https://frontend.example/confirm/")
     assert "?email=" in url
     assert "user.tag%40mailservice.int" in url
+
+
+def _auth_header(email: str) -> dict[str, str]:
+    assert JWT_SECRET
+    token = JwtService(JWT_SECRET).encode({"email": email, "role": Role.user})
+    return {"Authorization": f"Bearer {token}"}
+
+
+def test_list_users_requires_auth(client):
+    response = client.get("/chat/users")
+    assert response.status_code == 401
+    assert response.get_json() == {"error": "unauthorized"}
+
+
+def test_list_users_excludes_requester_and_inactive_users(client, sql_session):
+    sql_session.execute(delete(User))
+    sql_session.commit()
+
+    requester = User(
+        email="owner@example.com",
+        hash="hash",
+        role=Role.user,
+        is_active=True,
+    )
+    active_peer = User(
+        email="active@example.com",
+        hash="hash",
+        role=Role.user,
+        is_active=True,
+    )
+    inactive_peer = User(
+        email="inactive@example.com",
+        hash="hash",
+        role=Role.user,
+        is_active=False,
+    )
+
+    sql_session.add_all([requester, active_peer, inactive_peer])
+    sql_session.commit()
+
+    response = client.get("/chat/users", headers=_auth_header(requester.email))
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload is not None
+    assert {user["email"] for user in payload["users"]} == {
+        "active@example.com"
+    }

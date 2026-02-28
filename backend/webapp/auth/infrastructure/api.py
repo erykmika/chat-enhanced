@@ -3,13 +3,13 @@ from typing import Any
 from flask import Blueprint, Response, jsonify, request
 from pydantic import ValidationError
 
+from backend.common.jwt import JwtService
 from backend.webapp.auth.domain.dtos import (
     UserConfirmationInput,
     UserLoginInputDTO,
 )
 from backend.webapp.auth.domain.enums import LoginStatus, RegistrationStatus
 from backend.webapp.auth.domain.service.confirm import UserConfirmationService
-from backend.webapp.auth.domain.service.jwt import JwtService
 from backend.webapp.auth.domain.service.login import LoginService
 from backend.webapp.auth.domain.service.register import RegistrationService
 from backend.webapp.auth.infrastructure.external import (
