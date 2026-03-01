@@ -19,7 +19,7 @@ COPY alembic.ini ./alembic.ini
 COPY backend/ ./backend/
 
 # Copy entrypoint that runs Alembic migrations (optional) before starting the app.
-COPY backend/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY backend/webapp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 RUN pip install --no-cache-dir --upgrade pip \
